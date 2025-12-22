@@ -1,0 +1,609 @@
+================================================================================
+                    MERN eLEARN WEBSITE - COMPLETE FLOW DOCUMENTATION
+================================================================================
+
+PROJECT STRUCTURE:
+├── backend/                    (Node.js + Express server)
+│   ├── server.js              (Main entry point - runs first)
+│   ├── package.json           (Backend dependencies)
+│   ├── models/
+│   │   ├── User.js            (User schema with role, email, password)
+│   │   ├── Course.js          (Course schema - title, price, duration, imageUrl)
+│   │   ├── Lesson.js          (Lesson schema - linked to Course via courseId)
+│   │   └── Purchase.js        (Purchase schema - tracks user course purchases)
+│   ├── routes/
+│   │   ├── auth.js            (Authentication endpoints - register, login, logout)
+│   │   ├── course.js          (Course endpoints - CRUD + lesson management)
+│   │   ├── purchase.js        (Purchase endpoints - initiate, verify payment)
+│   │   ├── users.js           (User endpoints - profile, preferences)
+│   │   └── upload.js          (File upload - course images, videos)
+│   ├── middleware/
+│   │   ├── auth.js            (JWT verification middleware)
+│   │   └── requireAdmin.js    (Admin role verification middleware)
+│   └── uploads/               (Static files storage - images, videos)
+│
+└── frontend/                   (React + Vite app)
+    ├── public/
+    │   └── index.html         (HTML entry point)
+    ├── src/
+    │   ├── index.js           (React entry point - runs second)
+    │   ├── App.js             (Main app component with routing)
+    │   ├── auth.js            (Authentication utilities - token management)
+    │   ├── api.js             (Axios instance for API calls)
+    │   ├── config.js          (Runtime configuration)
+    │   ├── index.css          (Global styles)
+    │   ├── theme.css          (Theme variables)
+    │   ├── components/
+    │   │   ├── Nav.jsx        (Navigation bar)
+    │   │   ├── Footer.jsx     (Footer with social links)
+    │   │   ├── Card.jsx       (Reusable card component)
+    │   │   ├── Badge.jsx      (Badge component)
+    │   │   └── Spinner.jsx    (Loading spinner)
+    │   └── pages/
+    │       ├── Home.jsx       (Landing page - shows latest courses)
+    │       ├── Courses.jsx    (All courses page with filters)
+    │       ├── CourseDetail.jsx (Single course detail + purchase)
+    │       ├── CourseLessons.jsx (Video lessons for enrolled course)
+    │       ├── Dashboard.jsx  (User dashboard - enrolled courses)
+    │       ├── AdminPanel.jsx (Admin panel - create/edit courses)
+    │       ├── Login.jsx      (Login page)
+    │       ├── Register.jsx   (Registration page)
+    │       ├── About.jsx      (About page)
+    │       ├── Contact.jsx    (Contact page)
+    │       └── Transactions.jsx (Purchase history)
+    └── package.json           (Frontend dependencies)
+
+
+================================================================================
+                              EXECUTION FLOW
+================================================================================
+
+STEP 1: APPLICATION STARTUP
+────────────────────────────────────────────────────────────────────────────
+
+BACKEND STARTUP:
+1. npm run dev (in backend folder)
+   └─> Runs: nodemon server.js
+
+2. server.js executes:
+   • Loads environment variables from .env (MONGO_URI, PORT, JWT_SECRET, etc.)
+   • Initializes Express app
+   • Sets up CORS (allows frontend requests)
+   • Sets up middleware (JSON parsing, URL encoding)
+   • Connects to MongoDB:
+     - Database: elearndb (default)
+     - Collections created: users, courses, lessons, purchases
+   • Registers routes:
+     - /api/auth       (authentication)
+     - /api/courses    (course CRUD + lessons)
+     - /api/purchases  (payment/enrollment)
+     - /api/users      (user profile)
+     - /api/uploads    (file uploads)
+   • Starts Express server on PORT (default: 5000)
+   └─> Output: "MongoDB connected" + "Server started on port 5000"
+
+
+FRONTEND STARTUP:
+1. npm run dev (in frontend folder) OR npm start
+   └─> Runs: Vite dev server on localhost:3000 (or react-scripts)
+
+2. index.js executes:
+   • Applies runtime configuration via config.js
+   • Loads CSS files (index.css, animations.css, theme.css, Tailwind CSS)
+   • Creates React root and renders App component
+   • Wraps App with <BrowserRouter> for client-side routing
+
+3. App.js executes:
+   • Reads auth token from localStorage
+   • Sets up routes:
+     /              → Home page
+     /courses       → All courses
+     /courses/:id   → Course detail
+     /login         → Login page
+     /register      → Registration page
+     /dashboard/*   → User dashboard (requires authentication)
+     /admin         → Admin panel (requires admin role)
+     /about         → About page
+     /contact       → Contact page
+     /transactions  → Payment history
+   • Renders:
+     - Fixed background gradient (decorative)
+     - <Nav /> component (navigation bar)
+     - <main> with route rendering
+     - <Footer /> component
+
+
+================================================================================
+                          USER JOURNEY FLOWS
+================================================================================
+
+FLOW 1: NEW USER REGISTRATION & LOGIN
+──────────────────────────────────────────────────────────────────────────
+
+1. User lands on Home page (/)
+2. User clicks "Create free account" → Routes to /register
+3. Register.jsx loads:
+   • Renders registration form (email, password, confirm password)
+   • Form submission:
+     - Validates input (email format, password match)
+     - POST request to /api/auth/register via axios (api.js)
+     └─> Backend (routes/auth.js):
+         - Validates email not already registered
+         - Hashes password using bcryptjs
+         - Creates new User document in MongoDB
+         - Returns JWT token
+   • Stores token in localStorage
+   • Dispatches "session:changed" event
+   • Redirects to /dashboard
+
+4. User logs out OR tokens expire
+5. User clicks "Login" → Routes to /login
+6. Login.jsx loads:
+   • Renders login form (email, password)
+   • Form submission:
+     - POST request to /api/auth/login via axios
+     └─> Backend (routes/auth.js):
+         - Finds user by email
+         - Verifies password against hashed version
+         - Generates JWT token (expires in 30 days)
+         - Returns user data + token
+   • Stores token in localStorage
+   • Dispatches "session:changed" event
+   • Redirects to /dashboard
+
+
+FLOW 2: BROWSING & PURCHASING COURSES
+──────────────────────────────────────────────────────────────────────────
+
+1. User navigates to /courses (Courses.jsx)
+   • GET request to /api/courses?sort=latest (no auth required)
+   └─> Backend (routes/course.js):
+       - Queries all Course documents from MongoDB
+       - Applies filters (tech, price range, sort)
+       - Returns courses array
+
+2. Courses are rendered in grid layout with:
+   - Course image (from imageUrl field)
+   - Tech badge (e.g., "React", "Node.js")
+   - Title, description, duration
+   - Price and "View details" button
+
+3. User clicks "View details" on a course → Routes to /courses/:id (CourseDetail.jsx)
+   • GET request to /api/courses/:id (fetch full course details)
+   • Fetches lessons for course:
+     GET request to /api/courses/:id/lessons
+     └─> Backend (routes/course.js):
+         - Queries Lesson collection where courseId = :id
+         - Returns sorted lessons by order
+
+4. CourseDetail page displays:
+   - Course image and details
+   - List of lessons (title, duration, video URL)
+   - Price and "Buy Course" button (if not already enrolled)
+   - OR "Start Learning" button (if already enrolled)
+
+5. User clicks "Buy Course" (not authenticated or not enrolled)
+   • Opens purchase modal
+   • Shows payment processing simulation (20 second settlement)
+   • On completion:
+     POST request to /api/purchases/initiate with course_id
+     └─> Backend (routes/purchase.js):
+         - Verifies user is authenticated (via JWT middleware)
+         - Creates Purchase document in MongoDB
+         - Records: userId, courseId, purchaseDate, amount
+         - Simulates payment processing
+         - Returns success message
+
+   • Purchase modal shows "Processing..." with progress bar
+   • After settlement completes → Confirms enrollment
+   • Modal closes and page updates to show "Start Learning" button
+
+6. User clicks "Start Learning" → Routes to /courses/:id/lessons (CourseLessons.jsx)
+   • GET request to /api/courses/:id/lessons (same as step 3)
+   • Displays video player with current lesson
+   • Shows lesson list sidebar with:
+     - Current lesson highlighted
+     - Next/previous navigation
+     - Lesson duration and order
+
+
+FLOW 3: USER DASHBOARD
+──────────────────────────────────────────────────────────────────────────
+
+1. User navigates to /dashboard (Dashboard.jsx)
+   • RequireAuth wrapper checks for valid JWT token
+   • If no token → Redirects to /login
+   • If token exists:
+     GET request to /api/users/profile (with Authorization header)
+     └─> Backend (routes/users.js):
+         - Verifies JWT token (middleware/auth.js)
+         - Returns user profile data
+         - Queries all purchases by userId
+
+2. Dashboard displays:
+   - User profile info (email, join date)
+   - "My Courses" section:
+     • GET request to /api/purchases/my-purchases
+     • Shows all enrolled courses
+     • Each course is a card with:
+       - Course image
+       - Title, progress indicator
+       - "Continue Learning" button (routes to /courses/:id/lessons)
+
+
+FLOW 4: ADMIN PANEL (COURSE MANAGEMENT)
+──────────────────────────────────────────────────────────────────────────
+
+1. Admin user navigates to /admin (AdminPanel.jsx)
+   • RequireAdmin wrapper checks user.role === "admin"
+   • If not admin → Redirects to /
+   • If admin:
+     GET request to /api/courses (fetch all courses)
+
+2. AdminPanel displays:
+   - "Create New Course" button
+   - List of all courses with Edit/Delete buttons
+
+3. Admin clicks "Create New Course":
+   • Opens form for:
+     - Course title, description, price, tech stack, duration
+     - Upload course image
+   • Form submission:
+     POST request to /api/courses with form data
+     └─> Backend (routes/course.js):
+         - Verifies authentication + admin role
+         - Creates Course document in MongoDB
+         - Stores image in uploads/ folder
+         - Returns new course object
+
+4. Admin clicks "Edit" on a course:
+   • Form pre-populates with course data
+   • Updates: title, description, price, etc.
+   • Form submission:
+     PUT request to /api/courses/:id
+     └─> Backend (routes/course.js):
+         - Updates Course document
+         - Returns updated course
+
+5. Admin adds lessons to course:
+   • "Add Lesson" button in course detail
+   • Form for: lesson title, description, video URL, duration
+   • Form submission:
+     POST request to /api/courses/:id/lessons
+     └─> Backend (routes/course.js):
+         - Creates Lesson document in "lessons" collection
+         - Links to course via courseId field
+         - Auto-calculates course total duration
+         - Returns new lesson object
+
+6. Admin can also:
+   - PUT /api/courses/:id/lessons/:lessonId (update lesson)
+   - DELETE /api/courses/:id/lessons/:lessonId (delete lesson)
+   - DELETE /api/courses/:id (delete entire course)
+
+
+================================================================================
+                        DATABASE SCHEMA DETAILS
+================================================================================
+
+USER COLLECTION:
+{
+  _id: ObjectId,
+  email: String (unique),
+  password: String (hashed with bcryptjs),
+  role: String (user, admin),
+  createdAt: Date,
+  name: String (optional),
+  avatar: String (optional)
+}
+
+COURSE COLLECTION:
+{
+  _id: ObjectId,
+  title: String (required),
+  description: String,
+  price: Number,
+  duration: String (calculated from lessons, e.g., "5h 30m"),
+  tech: String (e.g., "React, Node.js"),
+  imageUrl: String,
+  createdAt: Date,
+  videoUrl: String (legacy field, may be deprecated)
+}
+
+LESSON COLLECTION:
+{
+  _id: ObjectId,
+  courseId: ObjectId (reference to Course._id),
+  title: String (required),
+  description: String,
+  videoUrl: String (required),
+  order: Number (lesson sequence),
+  durationSeconds: Number,
+  createdAt: Date
+}
+
+PURCHASE COLLECTION:
+{
+  _id: ObjectId,
+  userId: ObjectId (reference to User._id),
+  courseId: ObjectId (reference to Course._id),
+  purchaseDate: Date,
+  amount: Number,
+  paymentStatus: String (completed, pending, failed)
+}
+
+
+================================================================================
+                            API ENDPOINTS SUMMARY
+================================================================================
+
+AUTHENTICATION:
+  POST   /api/auth/register       (email, password) → token + user
+  POST   /api/auth/login          (email, password) → token + user
+  POST   /api/auth/logout         → success message
+
+COURSES (Admin only for create/update/delete):
+  GET    /api/courses             → all courses with filters
+  POST   /api/courses             (admin) → create course
+  PUT    /api/courses/:id         (admin) → update course
+  DELETE /api/courses/:id         (admin) → delete course
+
+LESSONS (Admin only for create/update/delete):
+  GET    /api/courses/:id/lessons → lessons for course
+  POST   /api/courses/:id/lessons (admin) → add lesson
+  PUT    /api/courses/:id/lessons/:lessonId (admin) → update lesson
+  DELETE /api/courses/:id/lessons/:lessonId (admin) → delete lesson
+
+PURCHASES:
+  POST   /api/purchases/initiate  (auth) → create purchase
+  GET    /api/purchases/my-purchases (auth) → user's purchases
+  GET    /api/purchases/verify    (auth) → verify purchase status
+
+USERS:
+  GET    /api/users/profile       (auth) → user profile
+  PUT    /api/users/profile       (auth) → update profile
+
+UPLOADS:
+  POST   /api/uploads/image       (auth, admin) → upload course image
+  POST   /api/uploads/video       (auth, admin) → upload video
+
+
+================================================================================
+                          DATA FLOW DIAGRAM
+================================================================================
+
+┌─────────────┐                      ┌──────────────┐
+│   Browser   │◄──────Routes────────►│   React App  │
+│  (Frontend) │                      │   (index.js) │
+└──────┬──────┘                      └──────┬───────┘
+       │                                    │
+       │ (localStorage)                     │ (App.js)
+       │ JWT Token                          │ Routes & Components
+       │                                    │
+       │         HTTP Requests              │
+       │         with JWT in header         │
+       └──────────────────┬──────────────────┘
+                          │
+                    ┌─────▼─────┐
+                    │   Express  │
+                    │   Server   │
+                    │(server.js) │
+                    └─────┬─────┘
+                          │
+           ┌──────────────┼──────────────┐
+           │              │              │
+        ┌──▼──┐    ┌─────▼────┐   ┌────▼─┐
+        │Auth │    │  Course  │   │Purch-│
+        │Route│    │  Route   │   │ase   │
+        │     │    │          │   │Route │
+        └──┬──┘    └─────┬────┘   └────┬─┘
+           │              │              │
+           │      ┌───────┴────────┐    │
+           │      │                │    │
+        ┌──▼──────▼──┐    ┌────────▼──┐│
+        │  MongoDB   │    │  File     ││
+        │ (Database) │    │ Storage   ││
+        │            │    │ (uploads)││
+        │ Collections│    │          ││
+        │ • users    │    └──────────┘│
+        │ • courses  │                 │
+        │ • lessons  │    ┌────────────┘
+        │ • purchases│    │
+        └────────────┘    │
+                          │
+                    ┌─────▼─────┐
+                    │  Middleware│
+                    │• auth.js   │
+                    │• requireAdm│
+                    └────────────┘
+
+
+================================================================================
+                       KEY FILE EXECUTION ORDER
+================================================================================
+
+INITIAL SERVER START:
+1. package.json (npm run dev) → calls server.js
+2. server.js
+   ├─ loads dotenv config
+   ├─ creates Express app
+   ├─ connects to MongoDB
+   ├─ registers routes (auth, course, purchase, users, upload)
+   ├─ listens on port 5000
+   └─ awaits HTTP requests
+
+FRONTEND LOAD:
+1. package.json (npm start/dev) → starts dev server
+2. index.html (loads from public/)
+3. index.js (renders React app)
+   ├─ applies runtime config
+   ├─ loads stylesheets
+   ├─ creates React root
+   └─ renders App component
+
+4. App.js (main component)
+   ├─ sets up routes with React Router
+   ├─ renders Nav, main content, Footer
+   └─ dispatches component based on route
+
+5. Route-specific component loads (e.g., Home.jsx)
+   ├─ makes API call to backend (via api.js with axios)
+   ├─ receives data from backend
+   ├─ renders JSX with data
+   └─ user interacts with UI
+
+
+================================================================================
+                          AUTHENTICATION FLOW
+================================================================================
+
+TOKEN STORAGE & VERIFICATION:
+1. User registers/logs in
+2. Backend generates JWT token with:
+   - Payload: { userId, email, role }
+   - Secret: JWT_SECRET (from .env)
+   - Expiration: 30 days
+
+3. Frontend stores token in localStorage as "token" key
+
+4. For authenticated requests:
+   - Frontend includes: Authorization: Bearer <token> header
+   - Backend middleware/auth.js verifies token:
+     • Decodes JWT
+     • Validates signature
+     • Checks expiration
+     • Extracts user data
+
+5. If token invalid/expired:
+   - Backend returns 401 Unauthorized
+   - Frontend (auth.js) clears localStorage
+   - Redirects user to /login
+
+
+================================================================================
+                            COMPONENT HIERARCHY
+================================================================================
+
+<App>
+├─ <Nav>
+│  ├─ Logo
+│  ├─ Navigation Links
+│  ├─ Dashboard Button (if logged in)
+│  └─ Logout Button (if logged in)
+│
+├─ <main> (Routes)
+│  ├─ <Home>
+│  │  ├─ Hero Section
+│  │  ├─ Highlights Card
+│  │  └─ Latest Courses (multiple <Card> components)
+│  │
+│  ├─ <Courses>
+│  │  ├─ Filters (tech, price, sort)
+│  │  └─ Course Grid (multiple <Card> components)
+│  │
+│  ├─ <CourseDetail>
+│  │  ├─ Course Header
+│  │  ├─ Course Description
+│  │  ├─ Lessons List
+│  │  ├─ Buy/Start Button
+│  │  └─ Purchase Modal (z-index: 50)
+│  │
+│  ├─ <CourseLessons>
+│  │  ├─ Video Player
+│  │  └─ Lessons Sidebar
+│  │
+│  ├─ <Dashboard>
+│  │  ├─ Profile Section
+│  │  └─ My Courses (enrolled courses)
+│  │
+│  ├─ <AdminPanel>
+│  │  ├─ Create Course Form
+│  │  └─ Course Management List
+│  │
+│  ├─ <Login>
+│  ├─ <Register>
+│  ├─ <About>
+│  ├─ <Contact>
+│  └─ <Transactions>
+│
+└─ <Footer>
+   ├─ Social Links
+   ├─ Navigation Links
+   └─ Copyright
+
+
+================================================================================
+                              NOTES & TIPS
+================================================================================
+
+1. CORS Configuration:
+   - Backend allows requests from frontend URL
+   - Frontend axios instance uses http://localhost:5000 as base URL
+
+2. Session Management:
+   - App.js listens for "session:changed" events
+   - Triggered after login/logout/registration
+   - Refreshes components to reflect auth state
+
+3. Protected Routes:
+   - RequireAuth: Checks for valid token, redirects to /login if missing
+   - RequireAdmin: Checks user.role === "admin", redirects to / if not admin
+
+4. Image Storage:
+   - Course images: backend/uploads/courses/
+   - Served via: /uploads/courses/<filename>
+   - Frontend accesses via imageUrl field in Course document
+
+5. Error Handling:
+   - API errors caught in components
+   - Displayed to user via alerts or error messages
+   - Backend returns HTTP status codes (400, 401, 404, 500, etc.)
+
+6. Styling:
+   - Tailwind CSS for utility classes
+   - Custom theme variables in theme.css
+   - Global styles in index.css
+
+7. API Calls:
+   - Using Axios (instance in api.js)
+   - Base URL: http://localhost:5000
+   - Default headers include JWT token from localStorage
+
+================================================================================
+                        COMMON USER WORKFLOWS
+================================================================================
+
+WORKFLOW 1: First-Time User
+1. Lands on Home (/)
+2. Browses courses on Courses (/courses)
+3. Clicks "Register" → /register
+4. Creates account
+5. Redirected to Dashboard (/dashboard)
+6. Browses courses again
+7. Enrolls in a course (Buy Course button)
+8. Starts learning (CourseLessons page)
+
+WORKFLOW 2: Returning User
+1. Lands on Home (/)
+2. Clicks "Login" → /login
+3. Enters credentials
+4. Redirected to Dashboard (/dashboard)
+5. Views enrolled courses
+6. Clicks "Continue Learning" on a course
+7. Resumes watching lessons
+
+WORKFLOW 3: Admin Creating Course
+1. Logs in as admin account
+2. Navigates to /admin
+3. Clicks "Create New Course"
+4. Fills form: title, description, price, tech, image
+5. Submits → Course created in MongoDB
+6. Clicks "Edit" on new course
+7. Clicks "Add Lesson" multiple times
+8. Adds 5-10 lessons with videos and durations
+9. Course duration auto-calculated from lessons
+10. Course now appears on /courses for users to enroll
+
+================================================================================
+                         END OF DOCUMENTATION
+================================================================================

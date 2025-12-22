@@ -1,0 +1,71 @@
+@keyframes floatUp {
+	0% {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes shimmerBar {
+	0% {
+		background-position: 0% 50%;
+	}
+	100% {
+		background-position: 200% 50%;
+	}
+}
+
+@keyframes spinPulse {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes gentleShake {
+	0% {
+		transform: translateX(0);
+	}
+	20% {
+		transform: translateX(-4px);
+	}
+	40% {
+		transform: translateX(4px);
+	}
+	60% {
+		transform: translateX(-3px);
+	}
+	80% {
+		transform: translateX(3px);
+	}
+	100% {
+		transform: translateX(0);
+	}
+}
+
+.animate-fade-up {
+	animation: floatUp 0.75s ease forwards;
+}
+
+.gradient-animate {
+	background-size: 200% 200%;
+	animation: shimmerBar 14s ease infinite;
+}
+
+.spinner-ring {
+	width: 2.5rem;
+	height: 2.5rem;
+	border-radius: 999px;
+	border: 3px solid rgba(39, 116, 246, 0.25);
+	border-top-color: #2774f6;
+	animation: spinPulse 0.9s linear infinite;
+}
+
+.shake-soft {
+	animation: gentleShake 0.6s ease;
+}

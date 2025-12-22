@@ -1,0 +1,117 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	body {
+		@apply bg-canvas text-ink-100 antialiased font-sans selection:bg-brand-500/30 selection:text-brand-400;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		@apply font-display tracking-tight text-ink-100;
+	}
+}
+
+@layer components {
+	/* --- GLOBAL DASHBOARD LAYOUT SYSTEM --- */
+
+	/* Root Layout Container */
+	.dashboard-root {
+		@apply min-h-screen bg-canvas flex flex-col lg:flex-row relative;
+	}
+
+	/* Sidebar Container */
+	.dashboard-sidebar {
+		@apply shrink-0 z-40 transition-all duration-300 ease-in-out;
+
+		/* Mobile: Fixed off-screen usually handled by JS state classes, but base is here */
+		@apply fixed inset-y-0 left-0 lg:sticky lg:top-24 lg:h-[calc(100vh-6rem)];
+
+		/* Default Desktop Width */
+		@apply w-72;
+	}
+
+	.dashboard-sidebar.collapsed {
+		@apply lg:w-20;
+	}
+
+	/* Main Content Area */
+	.dashboard-main {
+		@apply flex-1 w-full min-w-0 transition-all duration-300;
+		@apply py-6 px-4 sm:px-6 lg:px-8 lg:py-8;
+		/* Max width constraint for ultra-wide screens */
+		@apply max-w-[1920px] mx-auto;
+	}
+
+	/* Content Container (Center aligned logic) */
+	.dashboard-container {
+		@apply w-full max-w-7xl mx-auto space-y-6 lg:space-y-8;
+	}
+
+	/* Card Grid System */
+	.dashboard-grid-cards {
+		@apply grid gap-6 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3;
+	}
+
+	/* Split View (List + Form) */
+	.dashboard-grid-split {
+		@apply grid gap-8 grid-cols-1;
+	}
+
+	@media (min-width: 1280px) {
+		.dashboard-grid-split {
+			grid-template-columns: 1fr 24rem;
+		}
+	}
+
+	/* --- UTILITIES --- */
+
+	.glass {
+		@apply bg-surface/60 backdrop-blur-xl border border-white/10 shadow-glass;
+	}
+
+	.glass-card {
+		@apply bg-surface/40 backdrop-blur-md border border-white/5 hover:border-brand-500/50 transition-all duration-300;
+	}
+
+	.text-gradient {
+		@apply bg-clip-text text-transparent bg-gradient-to-r from-brand-400 to-indigo-400;
+	}
+
+	/* Custom Scrollbar helpers */
+	.scrollbar-hide::-webkit-scrollbar {
+		display: none;
+	}
+
+	.scrollbar-hide {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+}
+
+@layer utilities {
+	.text-balance {
+		text-wrap: balance;
+	}
+}
+
+/* Custom Scrollbar Global */
+::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+
+::-webkit-scrollbar-track {
+	@apply bg-canvas;
+}
+
+::-webkit-scrollbar-thumb {
+	@apply bg-surfaceHighlight rounded-full hover:bg-brand-500/50 transition-colors;
+}

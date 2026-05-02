@@ -5,6 +5,10 @@ node_modules/
 build/
 dist/
 
+# Uploads and media
+backend/uploads/
+frontend/uploads/
+
 # Environment variables
 .env
 .env.local

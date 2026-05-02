@@ -9,6 +9,19 @@ dist/
 backend/uploads/
 frontend/uploads/
 
+# Large files and binary files
+*.mp4
+*.webm
+*.mov
+*.avi
+*.mkv
+*.flv
+*.wmv
+*.pdf
+*.zip
+*.tar.gz
+*.rar
+
 # Environment variables
 .env
 .env.local

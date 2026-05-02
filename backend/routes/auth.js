@@ -69,9 +69,9 @@ routerAuth.post("/send-otp", async (req, res) => {
 
     const sent = await sendOtpEmail(
       email,
-      "Verify your account",
+      "MERN eLearn: Verify your account",
       `Your verification code is ${otp}. It expires in ${REG_OTP_EXP_MINUTES} minutes.`,
-      `<p>Your verification code is <strong>${otp}</strong>. It expires in ${REG_OTP_EXP_MINUTES} minutes.</p>`
+      `<p>Your verification code is <strong>${otp}</strong>. It expires in ${REG_OTP_EXP_MINUTES} minutes.</p>`,
     );
 
     if (!sent) {
@@ -124,9 +124,9 @@ routerAuth.post("/resend-otp", async (req, res) => {
 
     const sent = await sendOtpEmail(
       email,
-      "Your verification code (resend)",
+      "MERN eLearn: Verification Code (Resend)",
       `Your verification code is ${otp}. It expires in ${REG_OTP_EXP_MINUTES} minutes.`,
-      `<p>Your verification code is <strong>${otp}</strong>. It expires in ${REG_OTP_EXP_MINUTES} minutes.</p>`
+      `<p>Your verification code is <strong>${otp}</strong>. It expires in ${REG_OTP_EXP_MINUTES} minutes.</p>`,
     );
 
     if (!sent) {
@@ -180,7 +180,7 @@ routerAuth.post("/verify-otp", async (req, res) => {
     const verificationToken = jwtAuth.sign(
       { email, verified: true },
       JWT_SECRET,
-      { expiresIn: "15m" }
+      { expiresIn: "15m" },
     );
 
     return res.json({ msg: "OTP verified", verificationToken });
@@ -201,26 +201,28 @@ routerAuth.post("/register", async (req, res) => {
     const { name, email: rawEmail, password, verificationToken } = req.body;
     const email = normalizeEmail(rawEmail);
 
-    if (!verificationToken) {
-      return res.status(400).json({
-        error: "Verification token required. Please verify email first.",
-      });
-    }
-
-    let decoded;
-    try {
-      decoded = jwtAuth.verify(verificationToken, JWT_SECRET);
-    } catch (e) {
-      return res
-        .status(400)
-        .json({ error: "Invalid or expired verification token" });
-    }
-
-    if (decoded.email !== email) {
-      return res
-        .status(400)
-        .json({ error: "Email does not match verification token" });
-    }
+    // OTP verification is temporarily disabled.
+    // Keep this block for future re-enable:
+    // if (!verificationToken) {
+    //   return res.status(400).json({
+    //     error: "Verification token required. Please verify email first.",
+    //   });
+    // }
+    //
+    // let decoded;
+    // try {
+    //   decoded = jwtAuth.verify(verificationToken, JWT_SECRET);
+    // } catch (e) {
+    //   return res
+    //     .status(400)
+    //     .json({ error: "Invalid or expired verification token" });
+    // }
+    //
+    // if (decoded.email !== email) {
+    //   return res
+    //     .status(400)
+    //     .json({ error: "Email does not match verification token" });
+    // }
 
     if (!name || !email || !password)
       return res.status(400).json({ error: "All fields are required" });
@@ -273,9 +275,9 @@ routerAuth.post("/login", async (req, res) => {
     try {
       console.log(
         `[login attempt] email=${String(
-          email
+          email,
         ).toLowerCase()} mode=${mode} authHeaderPresent=${!!req.headers
-          .authorization}`
+          .authorization}`,
       );
     } catch (e) {
       // ignore logging errors
@@ -315,38 +317,57 @@ routerAuth.post("/login", async (req, res) => {
         .json({ error: "Please verify your email before logging in", email });
     }
 
-    // generate login OTP
-    const otp = process.env.EMAIL_USER
-      ? generateNumericOtp()
-      : DEV_FALLBACK_OTP;
-    const otpHash = await bcrypt.hash(otp, 10);
+    // OTP verification is temporarily disabled.
+    // Keep this block for future re-enable:
+    //
+    // // generate login OTP
+    // const otp = process.env.EMAIL_USER
+    //   ? generateNumericOtp()
+    //   : DEV_FALLBACK_OTP;
+    // const otpHash = await bcrypt.hash(otp, 10);
+    //
+    // user.loginOtpHash = otpHash;
+    // user.loginOtpExpiresAt = new Date(
+    //   Date.now() + LOGIN_OTP_EXP_MINUTES * 60 * 1000
+    // );
+    // user.loginOtpAttempts = 0;
+    // await user.save();
+    //
+    // const sent = await sendOtpEmail(
+    //   user.email,
+    //   "MERN eLearn: Login Code",
+    //   `Your login code is ${otp}. It expires in ${LOGIN_OTP_EXP_MINUTES} minutes.`,
+    //   `<p>Your login code is <strong>${otp}</strong>. It expires in ${LOGIN_OTP_EXP_MINUTES} minutes.</p>`
+    // );
+    //
+    // if (!sent) {
+    //   // cleanup fields if email failed to send
+    //   user.loginOtpHash = undefined;
+    //   user.loginOtpExpiresAt = undefined;
+    //   user.loginOtpAttempts = 0;
+    //   await user.save();
+    //   return res.status(500).json({ error: "Failed to send login code" });
+    // }
+    //
+    // return res.json({
+    //   msg: "OTP sent to your email. Please verify to complete login.",
+    //   email: user.email,
+    //   mode,
+    // });
 
-    user.loginOtpHash = otpHash;
-    user.loginOtpExpiresAt = new Date(
-      Date.now() + LOGIN_OTP_EXP_MINUTES * 60 * 1000
-    );
-    user.loginOtpAttempts = 0;
-    await user.save();
-
-    const sent = await sendOtpEmail(
-      user.email,
-      "Login verification code",
-      `Your login code is ${otp}. It expires in ${LOGIN_OTP_EXP_MINUTES} minutes.`,
-      `<p>Your login code is <strong>${otp}</strong>. It expires in ${LOGIN_OTP_EXP_MINUTES} minutes.</p>`
-    );
-
-    if (!sent) {
-      // cleanup fields if email failed to send
-      user.loginOtpHash = undefined;
-      user.loginOtpExpiresAt = undefined;
-      user.loginOtpAttempts = 0;
-      await user.save();
-      return res.status(500).json({ error: "Failed to send login code" });
-    }
+    const token = jwtAuth.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+      expiresIn: "8h",
+    });
 
     return res.json({
-      msg: "OTP sent to your email. Please verify to complete login.",
-      email: user.email,
+      msg: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
       mode,
     });
   } catch (err) {
@@ -391,16 +412,16 @@ routerAuth.post("/login/resend-otp", async (req, res) => {
     const otpHash = await bcrypt.hash(otp, 10);
     user.loginOtpHash = otpHash;
     user.loginOtpExpiresAt = new Date(
-      Date.now() + LOGIN_OTP_EXP_MINUTES * 60 * 1000
+      Date.now() + LOGIN_OTP_EXP_MINUTES * 60 * 1000,
     );
     user.loginOtpAttempts = 0;
     await user.save();
 
     const sent = await sendOtpEmail(
       user.email,
-      "Login verification code (resend)",
+      "MERN eLearn: Login Code (Resend)",
       `Your login code is ${otp}. It expires in ${LOGIN_OTP_EXP_MINUTES} minutes.`,
-      `<p>Your login code is <strong>${otp}</strong>. It expires in ${LOGIN_OTP_EXP_MINUTES} minutes.</p>`
+      `<p>Your login code is <strong>${otp}</strong>. It expires in ${LOGIN_OTP_EXP_MINUTES} minutes.</p>`,
     );
 
     if (!sent) {
@@ -499,7 +520,7 @@ routerAuth.post("/login/verify-otp", async (req, res) => {
 routerAuth.get("/me", authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select(
-      "-password -loginOtpHash"
+      "-password -loginOtpHash",
     );
     res.json(user);
   } catch (err) {
@@ -604,9 +625,9 @@ routerAuth.post("/forgot-password", async (req, res) => {
 
     const sent = await sendOtpEmail(
       email,
-      "Reset your password",
+      "MERN eLearn: Reset Password Request",
       `Your password reset code is ${otp}. It expires in ${REG_OTP_EXP_MINUTES} minutes.`,
-      `<p>Your password reset code is <strong>${otp}</strong>. It expires in ${REG_OTP_EXP_MINUTES} minutes.</p>`
+      `<p>Your password reset code is <strong>${otp}</strong>. It expires in ${REG_OTP_EXP_MINUTES} minutes.</p>`,
     );
 
     if (!sent) {
@@ -660,7 +681,7 @@ routerAuth.post("/verify-reset-otp", async (req, res) => {
     const resetToken = jwtAuth.sign(
       { email, purpose: "reset_password" },
       JWT_SECRET,
-      { expiresIn: "10m" }
+      { expiresIn: "10m" },
     );
 
     return res.json({ msg: "OTP verified", resetToken });

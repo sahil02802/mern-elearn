@@ -378,7 +378,7 @@ export default function Home() {
       {/* CTA Section */}
       <section className="py-24 relative overflow-hidden">
         <div className="section-shell">
-          <div className="relative rounded-[2.5rem] overflow-hidden bg-[#0A0B14] border border-white/5 p-10 md:p-16 lg:p-20 shadow-2xl group">
+          <div className="relative rounded-[2.5rem] overflow-hidden bg-surface border border-white/5 p-10 md:p-16 lg:p-20 shadow-2xl group">
             {/* Dynamic Backgrounds */}
             <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-30 mix-blend-soft-light" />
             <div className="absolute -top-24 -right-24 w-[800px] h-[800px] bg-brand-500/10 rounded-full blur-[100px] pointer-events-none transition-transform duration-1000 group-hover:scale-110" />
@@ -478,7 +478,7 @@ export default function Home() {
                   <img
                     src="https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
                     alt="Successful Developer"
-                    className="w-full h-full object-cover rounded-full border-4 border-[#0A0B14]"
+                    className="w-full h-full object-cover rounded-full border-4 border-surface"
                   />
                   {/* Gradient Halo */}
                   <div className="absolute -inset-4 rounded-full bg-gradient-to-tr from-brand-500 to-accent-500 opacity-20 blur-2xl -z-10" />
@@ -496,7 +496,7 @@ export default function Home() {
                   }}
                   className="absolute top-10 right-10 md:top-20 md:right-20 z-20"
                 >
-                  <Card className="flex items-center gap-3 p-3 pr-5 bg-[#0A0B14]/90 backdrop-blur-xl border-white/10 shadow-xl rounded-full">
+                  <Card className="flex items-center gap-3 p-3 pr-5 bg-surface/95 backdrop-blur-xl border-white/10 shadow-xl rounded-full">
                     <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-400">
                       <CheckCircle size={18} />
                     </div>
@@ -522,11 +522,11 @@ export default function Home() {
                   }}
                   className="absolute bottom-10 left-10 md:bottom-20 md:left-20 z-20"
                 >
-                  <Card className="flex items-center gap-3 p-3 pr-5 bg-[#0A0B14]/90 backdrop-blur-xl border-white/10 shadow-xl rounded-full">
+                  <Card className="flex items-center gap-3 p-3 pr-5 bg-surface/95 backdrop-blur-xl border-white/10 shadow-xl rounded-full">
                     <div className="flex -space-x-2">
-                      <div className="w-8 h-8 rounded-full bg-blue-500 border-2 border-[#0A0B14]" />
-                      <div className="w-8 h-8 rounded-full bg-purple-500 border-2 border-[#0A0B14]" />
-                      <div className="w-8 h-8 rounded-full bg-yellow-500 border-2 border-[#0A0B14]" />
+                      <div className="w-8 h-8 rounded-full bg-blue-500 border-2 border-surface" />
+                      <div className="w-8 h-8 rounded-full bg-purple-500 border-2 border-surface" />
+                      <div className="w-8 h-8 rounded-full bg-yellow-500 border-2 border-surface" />
                     </div>
                     <div className="text-left">
                       <p className="text-[10px] text-ink-400 font-bold uppercase tracking-wider">
@@ -630,17 +630,19 @@ function FeedbackList() {
                   "{f.comment}"
                 </p>
                 <div className="flex items-center gap-4 mt-auto">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-lg overflow-hidden shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-400 to-purple-500 p-[1px] flex items-center justify-center text-white font-bold text-sm shadow-lg overflow-hidden shrink-0">
                     {f.user?.avatar ? (
                       <img
                         src={f.user.avatar}
                         alt={f.user.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover rounded-full"
                       />
-                    ) : f.user?.name ? (
-                      f.user.name[0].toUpperCase()
                     ) : (
-                      "U"
+                      <img
+                        src="/avatar-placeholder.svg"
+                        alt="User"
+                        className="w-full h-full object-cover rounded-full"
+                      />
                     )}
                   </div>
                   <div>

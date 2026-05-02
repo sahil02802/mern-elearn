@@ -2,12 +2,11 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  LayoutDashboard,
-  CreditCard,
   BookOpen,
-  Users,
-  MessageSquare,
+  CreditCard,
   User,
+  MessageSquare,
+  Shield,
   Home as HomeIcon,
   Sparkles,
   ChevronRight,
@@ -17,7 +16,7 @@ import {
 } from "lucide-react";
 import { clearSession } from "../auth";
 
-export default function AdminSidebar({
+export default function UserSidebar({
   activeTab,
   setActiveTab,
   isCollapsed,
@@ -28,14 +27,17 @@ export default function AdminSidebar({
 }) {
   const navigate = useNavigate();
   const tabs = [
-    { id: "overview", label: "Overview", icon: LayoutDashboard },
     { id: "profile", label: "Profile", icon: User },
-    { id: "courses", label: "Courses", icon: BookOpen },
-    { id: "lessons", label: "Lessons", icon: BookOpen },
-    { id: "users", label: "Users", icon: Users },
-    { id: "purchases", label: "Transactions", icon: CreditCard },
+    { id: "overview", label: "My Learning", icon: BookOpen },
+    { id: "transactions", label: "Transactions", icon: CreditCard },
     { id: "feedback", label: "Feedback", icon: MessageSquare },
+    { id: "security", label: "Change Password", icon: Shield },
   ];
+
+  const sidebarVariants = {
+    expanded: { width: "18rem" },
+    collapsed: { width: "5rem" },
+  };
 
   const handleLogout = () => {
     clearSession();
@@ -43,14 +45,8 @@ export default function AdminSidebar({
     navigate("/");
   };
 
-  const sidebarVariants = {
-    expanded: { width: "18rem" }, // w-72
-    collapsed: { width: "5rem" }, // w-20
-  };
-
   return (
     <>
-      {/* Mobile Overlay */}
       <AnimatePresence>
         {isMobileOpen && (
           <motion.div
@@ -63,7 +59,6 @@ export default function AdminSidebar({
         )}
       </AnimatePresence>
 
-      {/* Sidebar Container */}
       <motion.aside
         className={`fixed inset-y-0 left-0 z-50 h-screen bg-surface border-r border-border/80 flex flex-col overflow-visible transition-all duration-300 ease-in-out lg:self-start lg:shrink-0 ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
@@ -72,9 +67,10 @@ export default function AdminSidebar({
         animate={isCollapsed ? "collapsed" : "expanded"}
         initial={false}
       >
-        {/* Header */}
         <div
-          className={`h-20 flex items-center border-b border-border/80 relative ${isCollapsed ? "justify-center px-0" : "px-6"}`}
+          className={`h-20 flex items-center border-b border-border/80 relative ${
+            isCollapsed ? "justify-center px-0" : "px-6"
+          }`}
         >
           <Link
             to="/"
@@ -100,7 +96,6 @@ export default function AdminSidebar({
             </motion.div>
           </Link>
 
-          {/* Close Mobile */}
           <button
             onClick={() => setIsMobileOpen(false)}
             className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-400 lg:hidden"
@@ -110,7 +105,6 @@ export default function AdminSidebar({
         </div>
 
         <div className="flex-1 min-h-0 flex flex-col">
-          {/* Navigation */}
           <nav className="flex-1 min-h-0 overflow-hidden py-6 px-3 space-y-1">
             {!isCollapsed && (
               <div className="px-3 mb-2 text-xs font-bold text-ink-500 uppercase tracking-widest">
@@ -151,57 +145,54 @@ export default function AdminSidebar({
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
-                <React.Fragment key={tab.id}>
-                  <button
-                    onClick={() => {
-                      setActiveTab(tab.id);
-                      setIsMobileOpen(false);
-                    }}
-                    className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative ${
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    setIsMobileOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group relative ${
+                    isActive
+                      ? "bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/25"
+                      : "text-ink-400 hover:text-ink-100 hover:bg-surfaceHighlight"
+                  } ${isCollapsed ? "justify-center" : ""}`}
+                >
+                  <tab.icon
+                    size={20}
+                    className={`${
                       isActive
-                        ? "bg-gradient-to-r from-rose-500 to-rose-600 text-white shadow-lg shadow-rose-500/25"
-                        : "text-ink-400 hover:text-ink-100 hover:bg-surfaceHighlight"
-                    } ${isCollapsed ? "justify-center" : ""}`}
+                        ? "text-white"
+                        : "text-ink-400 group-hover:text-white"
+                    } transition-colors`}
+                  />
+
+                  <motion.span
+                    animate={{
+                      opacity: isCollapsed ? 0 : 1,
+                      width: isCollapsed ? 0 : "auto",
+                      display: isCollapsed ? "none" : "block",
+                    }}
+                    className="font-medium whitespace-nowrap overflow-hidden"
                   >
-                    <tab.icon
-                      size={20}
-                      className={`${
-                        isActive
-                          ? "text-white"
-                          : "text-ink-400 group-hover:text-white"
-                      } transition-colors`}
-                    />
+                    {tab.label}
+                  </motion.span>
 
-                    <motion.span
-                      animate={{
-                        opacity: isCollapsed ? 0 : 1,
-                        width: isCollapsed ? 0 : "auto",
-                        display: isCollapsed ? "none" : "block",
-                      }}
-                      className="font-medium whitespace-nowrap overflow-hidden"
-                    >
+                  {isCollapsed && (
+                    <div className="absolute left-14 px-3 py-1.5 bg-surface text-ink-100 text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 border border-border shadow-xl pointer-events-none">
                       {tab.label}
-                    </motion.span>
+                    </div>
+                  )}
 
-                    {/* Hover Tooltip for Collapsed */}
-                    {isCollapsed && (
-                      <div className="absolute left-14 px-3 py-1.5 bg-surface text-ink-100 text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 border border-border shadow-xl pointer-events-none">
-                        {tab.label}
-                      </div>
-                    )}
-
-                    {isActive && !isCollapsed && (
-                      <div className="ml-auto">
-                        <ChevronRight size={14} className="text-white/50" />
-                      </div>
-                    )}
-                  </button>
-                </React.Fragment>
+                  {isActive && !isCollapsed && (
+                    <div className="ml-auto">
+                      <ChevronRight size={14} className="text-white/50" />
+                    </div>
+                  )}
+                </button>
               );
             })}
           </nav>
 
-          {/* Footer / User    */}
           <div className="mt-auto shrink-0 p-4 border-t border-border/80 bg-surface">
             <div
               className={`flex w-full items-center ${
@@ -245,11 +236,9 @@ export default function AdminSidebar({
                     className="overflow-hidden whitespace-nowrap"
                   >
                     <p className="text-sm font-bold text-white truncate">
-                      {currentUser?.name || "Admin"}
+                      {currentUser?.name || "User"}
                     </p>
-                    <p className="text-xs text-ink-400 truncate">
-                      Administrator
-                    </p>
+                    <p className="text-xs text-ink-400 truncate">Learner</p>
                   </motion.div>
                 </div>
               </motion.div>
@@ -266,14 +255,15 @@ export default function AdminSidebar({
           </div>
         </div>
 
-        {/* Desktop Collapse Toggle - Floating on border */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className="hidden lg:flex absolute -right-3 top-24 w-6 h-6 bg-surface border border-border rounded-full items-center justify-center text-ink-400 hover:text-ink-100 hover:scale-110 transition-all shadow-lg z-50"
         >
           <ChevronLeft
             size={14}
-            className={`transition-transform duration-300 ${isCollapsed ? "rotate-180" : ""}`}
+            className={`transition-transform duration-300 ${
+              isCollapsed ? "rotate-180" : ""
+            }`}
           />
         </button>
       </motion.aside>

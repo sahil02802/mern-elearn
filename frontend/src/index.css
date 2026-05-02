@@ -4,114 +4,589 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-	body {
-		@apply bg-canvas text-ink-100 antialiased font-sans selection:bg-brand-500/30 selection:text-brand-400;
-	}
+:root {
+  --color-bg: #f8f6f2;
+  --color-surface: #ffffff;
+  --color-surface-soft: #eee8df;
+  --color-primary: #1f3a5f;
+  --color-secondary: #2c7da0;
+  --color-accent: #1b9aaa;
+  --color-cta: #f4a261;
+  --color-error: #e76f51;
+  --color-text: #1e293b;
+  --color-text-muted: #64748b;
+  --color-border: #eee8df;
+}
 
-	h1,
-	h2,
-	h3,
-	h4,
-	h5,
-	h6 {
-		@apply font-display tracking-tight text-ink-100;
-	}
+@layer base {
+  body {
+    @apply bg-canvas text-ink-100 antialiased font-sans selection:bg-brand-500/20 selection:text-brand-500;
+    background-image:
+      radial-gradient(
+        circle at 8% 10%,
+        color-mix(in srgb, var(--color-secondary) 10%, transparent),
+        transparent 28%
+      ),
+      radial-gradient(
+        circle at 92% 6%,
+        color-mix(in srgb, var(--color-accent) 8%, transparent),
+        transparent 32%
+      ),
+      linear-gradient(
+        180deg,
+        var(--color-bg) 0%,
+        var(--color-surface-soft) 100%
+      );
+  }
+
+  a {
+    color: var(--color-primary);
+    text-decoration-color: color-mix(
+      in srgb,
+      var(--color-primary) 45%,
+      transparent
+    );
+    text-underline-offset: 2px;
+  }
+
+  a:hover {
+    color: var(--color-primary);
+    text-decoration-color: var(--color-primary);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-display tracking-tight text-ink-100;
+  }
+
+  :where(button, [role="button"], a, input, textarea, select):focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--color-surface) 70%, transparent);
+  }
+
+  :where(button, [role="button"], .btn, a[role="button"]):active {
+    transform: translateY(1px);
+  }
+
+  :where(button, [role="button"], input, textarea, select):disabled,
+  :where(
+    button,
+    [role="button"],
+    input,
+    textarea,
+    select
+  )[aria-disabled="true"] {
+    opacity: 0.58;
+    cursor: not-allowed;
+    filter: saturate(0.8);
+  }
 }
 
 @layer components {
-	/* --- GLOBAL DASHBOARD LAYOUT SYSTEM --- */
+  /* --- GLOBAL DASHBOARD LAYOUT SYSTEM --- */
 
-	/* Root Layout Container */
-	.dashboard-root {
-		@apply min-h-screen bg-canvas flex flex-col lg:flex-row relative;
-	}
+  /* Root Layout Container */
+  .dashboard-root {
+    @apply min-h-screen bg-canvas flex flex-col lg:flex-row relative;
+  }
 
-	/* Sidebar Container */
-	.dashboard-sidebar {
-		@apply shrink-0 z-40 transition-all duration-300 ease-in-out;
+  /* Sidebar Container */
+  .dashboard-sidebar {
+    @apply shrink-0 z-40 transition-all duration-300 ease-in-out;
 
-		/* Mobile: Fixed off-screen usually handled by JS state classes, but base is here */
-		@apply fixed inset-y-0 left-0 lg:sticky lg:top-24 lg:h-[calc(100vh-6rem)];
+    /* Mobile: Fixed off-screen usually handled by JS state classes, but base is here */
+    @apply fixed inset-y-0 left-0 lg:sticky lg:top-24 lg:h-[calc(100vh-6rem)];
 
-		/* Default Desktop Width */
-		@apply w-72;
-	}
+    /* Default Desktop Width */
+    @apply w-72;
+  }
 
-	.dashboard-sidebar.collapsed {
-		@apply lg:w-20;
-	}
+  .dashboard-sidebar.collapsed {
+    @apply lg:w-20;
+  }
 
-	/* Main Content Area */
-	.dashboard-main {
-		@apply flex-1 w-full min-w-0 transition-all duration-300;
-		@apply py-6 px-4 sm:px-6 lg:px-8 lg:py-8;
-		/* Max width constraint for ultra-wide screens */
-		@apply max-w-[1920px] mx-auto;
-	}
+  /* Main Content Area */
+  .dashboard-main {
+    @apply flex-1 w-full min-w-0 transition-all duration-300;
+    @apply py-6 px-4 sm:px-6 lg:px-8 lg:py-8;
+    /* Max width constraint for ultra-wide screens */
+    @apply max-w-[1920px] mx-auto;
+  }
 
-	/* Content Container (Center aligned logic) */
-	.dashboard-container {
-		@apply w-full max-w-7xl mx-auto space-y-6 lg:space-y-8;
-	}
+  /* Content Container (Center aligned logic) */
+  .dashboard-container {
+    @apply w-full max-w-7xl mx-auto space-y-6 lg:space-y-8;
+  }
 
-	/* Card Grid System */
-	.dashboard-grid-cards {
-		@apply grid gap-6 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3;
-	}
+  /* Card Grid System */
+  .dashboard-grid-cards {
+    @apply grid gap-6 grid-cols-1 sm:grid-cols-2 xl:grid-cols-3;
+  }
 
-	/* Split View (List + Form) */
-	.dashboard-grid-split {
-		@apply grid gap-8 grid-cols-1;
-	}
+  /* Split View (List + Form) */
+  .dashboard-grid-split {
+    @apply grid gap-8 grid-cols-1;
+  }
 
-	@media (min-width: 1280px) {
-		.dashboard-grid-split {
-			grid-template-columns: 1fr 24rem;
-		}
-	}
+  @media (min-width: 1280px) {
+    .dashboard-grid-split {
+      grid-template-columns: 1fr 24rem;
+    }
+  }
 
-	/* --- UTILITIES --- */
+  /* --- UTILITIES --- */
 
-	.glass {
-		@apply bg-surface/60 backdrop-blur-xl border border-white/10 shadow-glass;
-	}
+  .glass {
+    @apply bg-surface/90 backdrop-blur-xl border border-border/80 shadow-glass;
+  }
 
-	.glass-card {
-		@apply bg-surface/40 backdrop-blur-md border border-white/5 hover:border-brand-500/50 transition-all duration-300;
-	}
+  .glass-card {
+    @apply bg-surface/75 backdrop-blur-md border border-border/70 hover:border-brand-500/45 transition-all duration-300;
+  }
 
-	.text-gradient {
-		@apply bg-clip-text text-transparent bg-gradient-to-r from-brand-400 to-indigo-400;
-	}
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-500 to-accent-500;
+  }
 
-	/* Custom Scrollbar helpers */
-	.scrollbar-hide::-webkit-scrollbar {
-		display: none;
-	}
+  /* Custom Scrollbar helpers */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 
-	.scrollbar-hide {
-		-ms-overflow-style: none;
-		scrollbar-width: none;
-	}
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 @layer utilities {
-	.text-balance {
-		text-wrap: balance;
-	}
+  .text-balance {
+    text-wrap: balance;
+  }
 }
 
 /* Custom Scrollbar Global */
 ::-webkit-scrollbar {
-	width: 6px;
-	height: 6px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-	@apply bg-canvas;
+  @apply bg-canvas;
 }
 
 ::-webkit-scrollbar-thumb {
-	@apply bg-surfaceHighlight rounded-full hover:bg-brand-500/50 transition-colors;
+  @apply bg-border rounded-full hover:bg-brand-500/45 transition-colors;
+}
+
+/* Compatibility layer for existing dark utility classes used across JSX pages. */
+.text-white {
+  color: var(--color-text) !important;
+}
+
+.text-ink-500,
+.text-ink-600 {
+  color: var(--color-text-muted) !important;
+}
+
+.text-brand-400,
+.hover\:text-brand-400:hover {
+  color: var(--color-primary) !important;
+}
+
+.hover\:text-white:hover,
+.group:hover .group-hover\:text-white {
+  color: var(--color-text) !important;
+}
+
+.text-white\/50 {
+  color: color-mix(in srgb, var(--color-text) 62%, transparent) !important;
+}
+
+.text-white\/20 {
+  color: color-mix(in srgb, var(--color-text) 48%, transparent) !important;
+}
+
+.border-white\/5 {
+  border-color: color-mix(
+    in srgb,
+    var(--color-border) 70%,
+    transparent
+  ) !important;
+}
+
+.border-white\/10 {
+  border-color: color-mix(
+    in srgb,
+    var(--color-border) 95%,
+    transparent
+  ) !important;
+}
+
+.bg-black,
+.bg-gray-900,
+.bg-\[\#0A0B14\]\/90 {
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 96%,
+    transparent
+  ) !important;
+}
+
+.bg-black\/20 {
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 8%,
+    transparent
+  ) !important;
+}
+
+.bg-black\/40 {
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 16%,
+    transparent
+  ) !important;
+}
+
+.bg-black\/50 {
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 24%,
+    transparent
+  ) !important;
+}
+
+.bg-black\/60 {
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 34%,
+    transparent
+  ) !important;
+}
+
+.bg-black\/80 {
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 56%,
+    transparent
+  ) !important;
+}
+
+.bg-\[\#0A0B14\],
+.bg-\[\#0a0a0a\],
+.bg-\[\#0A0B14\]\/90 {
+  background-color: color-mix(
+    in srgb,
+    var(--color-surface) 96%,
+    transparent
+  ) !important;
+}
+
+.bg-white\/5 {
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 5%,
+    transparent
+  ) !important;
+}
+
+.bg-white\/10 {
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 9%,
+    transparent
+  ) !important;
+}
+
+.hover\:bg-white\/5:hover,
+.group:hover .group-hover\:bg-white\/10 {
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 8%,
+    transparent
+  ) !important;
+}
+
+/* Preserve white text inside strong color/gradient elements for contrast. */
+.bg-brand-500 .text-white,
+.bg-brand-600 .text-white,
+.bg-accent-500 .text-white,
+.bg-accent-600 .text-white,
+.bg-rose-500 .text-white,
+.bg-rose-600 .text-white,
+.bg-red-500 .text-white,
+.bg-green-500 .text-white,
+.bg-brand-500.text-white,
+.bg-brand-600.text-white,
+.bg-accent-500.text-white,
+.bg-accent-600.text-white,
+.bg-rose-500.text-white,
+.bg-rose-600.text-white,
+.bg-red-500.text-white,
+.bg-green-500.text-white,
+.from-brand-500 .text-white,
+.to-brand-500 .text-white,
+.from-rose-500 .text-white,
+.to-rose-600 .text-white,
+.from-accent-500 .text-white,
+.to-accent-600 .text-white,
+.from-brand-500.text-white,
+.to-brand-500.text-white,
+.from-accent-500.text-white,
+.to-accent-600.text-white,
+.from-rose-500.text-white,
+.to-rose-600.text-white,
+.bg-gradient-to-r.text-white,
+.bg-gradient-brand .text-white,
+/* Preserve white text on dark backgrounds for badges and overlays */
+.bg-black .text-white,
+.bg-black\/20 .text-white,
+.bg-black\/40 .text-white,
+.bg-black\/50 .text-white,
+.bg-black\/60 .text-white,
+.bg-black\/80 .text-white,
+.bg-black.text-white,
+.bg-black\/20.text-white,
+.bg-black\/40.text-white,
+.bg-black\/50.text-white,
+.bg-black\/60.text-white,
+.bg-black\/80.text-white {
+  color: #ffffff !important;
+}
+
+/* Remap legacy semantic utility hues to the approved palette only. */
+.bg-rose-500,
+.bg-rose-600,
+.bg-red-500 {
+  background-color: var(--color-error) !important;
+}
+
+.bg-red-500\/10,
+.hover\:bg-red-500\/10:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--color-error) 10%,
+    transparent
+  ) !important;
+}
+
+.bg-red-500\/20,
+.hover\:bg-red-500\/20:hover {
+  background-color: color-mix(
+    in srgb,
+    var(--color-error) 20%,
+    transparent
+  ) !important;
+}
+
+.text-rose-500,
+.text-rose-600,
+.text-red-300,
+.text-red-400,
+.text-red-500,
+.hover\:text-rose-500:hover,
+.hover\:text-red-300:hover {
+  color: var(--color-error) !important;
+}
+
+.border-rose-500,
+.border-red-500,
+.hover\:border-rose-500\/30:hover {
+  border-color: var(--color-error) !important;
+}
+
+.from-rose-500 {
+  --tw-gradient-from: var(--color-error) var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: color-mix(in srgb, var(--color-error) 0%, transparent)
+    var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops:
+    var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+.to-rose-600 {
+  --tw-gradient-to: var(--color-error) var(--tw-gradient-to-position) !important;
+}
+
+.bg-green-500 {
+  background-color: var(--color-accent) !important;
+}
+
+.bg-green-500\/20 {
+  background-color: color-mix(
+    in srgb,
+    var(--color-accent) 20%,
+    transparent
+  ) !important;
+}
+
+.text-green-400 {
+  color: var(--color-accent) !important;
+}
+
+.border-green-500,
+.hover\:border-green-500\/30:hover {
+  border-color: var(--color-accent) !important;
+}
+
+.bg-blue-500 {
+  background-color: var(--color-secondary) !important;
+}
+
+.text-blue-500 {
+  color: var(--color-secondary) !important;
+}
+
+.border-blue-500 {
+  border-color: var(--color-secondary) !important;
+}
+
+.bg-purple-500 {
+  background-color: var(--color-primary) !important;
+}
+
+.text-purple-500 {
+  color: var(--color-primary) !important;
+}
+
+.border-purple-500,
+.hover\:border-purple-500\/30:hover {
+  border-color: var(--color-primary) !important;
+}
+
+.bg-yellow-500 {
+  background-color: var(--color-cta) !important;
+}
+
+.text-yellow-500 {
+  color: var(--color-cta) !important;
+}
+
+.border-yellow-500 {
+  border-color: var(--color-cta) !important;
+}
+
+.from-blue-500,
+.from-purple-500,
+.from-yellow-500 {
+  --tw-gradient-from: var(--color-secondary) var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: color-mix(in srgb, var(--color-secondary) 0%, transparent)
+    var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops:
+    var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+.to-blue-500,
+.to-purple-500,
+.to-yellow-500 {
+  --tw-gradient-to: var(--color-primary) var(--tw-gradient-to-position) !important;
+}
+
+/* Global consistency layer for tabular data, modals, forms and badges. */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-border) 95%, transparent);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+thead {
+  background: color-mix(
+    in srgb,
+    var(--color-surface-soft) 86%,
+    var(--color-surface)
+  );
+}
+
+th,
+td {
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--color-border) 85%, transparent);
+  color: var(--color-text);
+}
+
+tbody tr:hover {
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
+}
+
+tbody tr:active {
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+}
+
+.fixed.inset-0.z-50,
+.fixed.inset-0.bg-black\/60,
+.fixed.inset-0.bg-black\/80 {
+  background-color: color-mix(
+    in srgb,
+    var(--color-primary) 34%,
+    transparent
+  ) !important;
+}
+
+input,
+textarea,
+select {
+  border-color: color-mix(
+    in srgb,
+    var(--color-primary) 26%,
+    var(--color-border)
+  );
+  color: var(--color-text);
+  background: color-mix(in srgb, var(--color-surface) 98%, transparent);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: color-mix(in srgb, var(--color-text-muted) 88%, transparent);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px
+    color-mix(in srgb, var(--color-primary) 45%, transparent);
+}
+
+input:hover,
+textarea:hover,
+select:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--color-primary) 35%,
+    var(--color-border)
+  );
+}
+
+input:active,
+textarea:active,
+select:active {
+  background: color-mix(
+    in srgb,
+    var(--color-surface-soft) 35%,
+    var(--color-surface)
+  );
+}
+
+.glass:hover,
+.glass-card:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--color-primary) 35%,
+    var(--color-border)
+  );
+}
+
+[class*="badge"],
+.rounded-full.border.text-xs,
+.rounded-full.border.text-sm {
+  border-color: color-mix(in srgb, var(--color-border) 90%, transparent);
 }

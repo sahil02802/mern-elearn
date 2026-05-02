@@ -187,8 +187,10 @@ export default function CourseDetail() {
           <img
             src={course.imageUrl || "/assets/placeholder.svg"}
             alt={course.title}
-            className="w-full h-full object-cover opacity-40 blur-sm"
+            className="w-full h-full object-cover blur-sm"
           />
+          {/* Non-destructive dark overlay to keep image design but darken visuals */}
+          <div className="absolute inset-0 bg-black/40 pointer-events-none" />
           <div className="absolute inset-0 bg-gradient-to-t from-canvas via-canvas/90 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-canvas via-canvas/80 to-transparent" />
         </div>

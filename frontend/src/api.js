@@ -2,7 +2,7 @@ import axios from "axios";
 import { clearSession, getToken } from "./auth";
 
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || "http://localhost:5000/api",
+  baseURL: process.env.REACT_APP_API_URL || "https://mern-elearn-backend.onrender.com",
 });
 
 API.interceptors.request.use((req) => {

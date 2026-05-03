@@ -9,7 +9,7 @@ const User = require("./models/User");
 const app = express();
 
 // CORS configuration
-const clientUrl = process.env.CLIENT_URL || "http://localhost:3000";
+const clientUrl = process.env.CLIENT_URL || "https://mern-elearn-frontend.onrender.com";
 const allowedOrigins = [clientUrl, "http://localhost:3001", "http://localhost:3002"];
 
 app.use(cors({
